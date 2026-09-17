@@ -1,0 +1,55 @@
+/* ============================================================
+   交互反馈：悬停 = 轻微放大，去掉蓝色焦点框
+   ------------------------------------------------------------
+   1. 鼠标悬停任何可交互元素 → 轻微放大（不再出现蓝色描边框）
+   2. 键盘 Tab 仍保留柔和可见的焦点环（可访问性），但不再是刺眼的蓝框
+   删除本文件 + 移除 index.html 里的 <link> 即可回退
+   ============================================================ */
+
+/* ---------- 全局：去掉默认蓝色焦点框 ---------- */
+button, a, input, select, textarea, [tabindex] { outline: none; }
+button:focus, a:focus, input:focus, select:focus, [tabindex]:focus { outline: none; }
+
+/* 键盘操作时给一个柔和的圆角光环（鼠标点击不会出现） */
+button:focus-visible, a:focus-visible, [role="button"]:focus-visible {
+  outline: 2px solid var(--brand-soft) !important;
+  outline-offset: 4px;
+  border-radius: 12px;
+}
+/* 输入框保持"描边发光"式的焦点（不是方框） */
+input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: none !important;
+  border-color: var(--brand) !important;
+}
+
+/* ---------- 悬停：轻微放大 ---------- */
+.mini-btn, .chip, .icon-btn, .btn, .text-btn, .major-chip, .tab,
+.add-item, .mx, .sum-x, .search-clear, .tray-chip button {
+  transition: transform .2s cubic-bezier(.34, 1.4, .64, 1),
+              background-color .2s var(--ease-out), color .2s var(--ease-out),
+              border-color .2s var(--ease-out), box-shadow .25s var(--ease-out);
+  transform-origin: center;
+}
+/* 悬停：放大（加 !important 压过 styles.css 里各处旧的 transform 规则） */
+.mini-btn:hover, .text-btn:hover, .sum-x:hover, .search-clear:hover,
+.tray-chip button:hover { transform: scale(1.06) !important; }
+
+.chip:hover, .major-chip:hover, .add-item:hover:not([disabled]),
+.mx:hover, .tab:hover, .btn:hover, .icon-btn:hover { transform: scale(1.035) !important; }
+
+/* 文字按钮放大时不要撑动布局 */
+.text-btn, .sum-x { display: inline-block; }
+
+/* 卡片上的小按钮放大时保持在同一位置 */
+.card-actions .mini-btn:hover { transform: scale(1.07); }
+
+/* 卡片本身：悬停轻微放大 + 保留原有的上浮 */
+.uni-card:hover { transform: translateY(-2px) scale(1.006) !important; }
+
+/* 兼容触屏：点按不放大，避免"卡在放大态" */
+@media (hover: none) {
+  .mini-btn:hover, .chip:hover, .major-chip:hover, .add-item:hover,
+  .mx:hover, .tab:hover, .btn:hover, .icon-btn:hover, .text-btn:hover,
+  .sum-x:hover, .search-clear:hover, .tray-chip button:hover,
+  .uni-card:hover { transform: none; }
+}

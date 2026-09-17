@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Academiaseek · A-Level 录取要求查询</title>
+<!--
+  ============================================================
+  英澳法德马新 · QS 前 300 大学 A-Level 录取要求查询
+  ============================================================
+  文件分工：
+    index.html   界面结构
+    styles.css   外观
+    data.js      数据（由 xlsx 自动生成，勿手改）
+    app.js       逻辑
+  ============================================================
+-->
+<link rel="stylesheet" href="styles.css">
+<!-- 卡片毛玻璃材质（独立一层，想回退就删掉这一行） -->
+<link rel="stylesheet" href="card-material.css">
+<!-- 交互反馈：悬停轻微放大、去掉蓝色焦点框（独立一层，可删） -->
+<link rel="stylesheet" href="interaction.css">
+<!-- 暗色模式 + 性能优化（独立一层，可删） -->
+<link rel="stylesheet" href="performance.css">
+</head>
+<body>
+
+<noscript>
+  <div class="load-warn"><strong>JavaScript 被禁用了。</strong>
+    本页的搜索、筛选、专业切换都依赖脚本，请在浏览器设置里允许 JavaScript。</div>
+</noscript>
+<div id="noScript" class="load-warn" hidden><strong>页面脚本没有运行起来。</strong>
+  如果你是在「预览面板 / 内置窗口」里看的，那里通常会禁掉 JavaScript —— 请用浏览器直接打开
+  <code>index.html</code>（双击即可）。若已是浏览器打开，请按 F12 查看 Console 报错。</div>
+<script>document.getElementById('noScript').hidden = false;</script>
+
+<!-- ===================== 顶部 ===================== -->
+<header class="app-header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 10 12 5 2 10l10 5 10-5Z"></path>
+          <path d="M6 12.5V17c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5"></path>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <h1>Academiaseek</h1>
+        <p>A-Level · 英澳法德马新 · QS 前 300</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <span class="data-count" id="dataCount">—</span>
+      <button class="icon-btn" id="themeBtn" type="button" title="切换主题">
+        <span id="themeIcon">☀</span><span class="icon-btn-label" id="themeLabel">日间</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="shell">
+
+  <!-- ===================== 搜索 + 筛选 ===================== -->
+  <div class="search-bar">
+    <div class="search-field">
+      <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.2-3.2"></path>
+      </svg>
+      <input type="search" id="searchInput" placeholder="搜索大学名称 / 英文名 / 城市 / 国家…" autocomplete="off">
+      <button class="search-clear" id="searchClear" type="button" title="清空" hidden>✕</button>
+    </div>
+    <button class="filter-btn" id="filterToggle" type="button">
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M3 5h18M6 12h12M10 19h4"></path>
+      </svg>
+      筛选<span class="filter-badge" id="filterBadge" hidden>0</span>
+    </button>
+  </div>
+
+  <!-- ===================== 当前条件摘要（无筛选时只显示专业） ===================== -->
+  <div class="active-summary" id="activeSummary" hidden></div>
+
+  <!-- ===================== 筛选面板（含专业选择） ===================== -->
+  <section class="filter-panel" id="filterPanel" hidden></section>
+
+  <!-- ===================== 我的成绩（可选） ===================== -->
+  <section class="grade-block" id="gradeBlock" hidden>
+    <label for="gradeSelect">我的 A-Level 预估成绩</label>
+    <select id="gradeSelect">
+      <option value="">不限制</option>
+      <option value="18">A*A*A*</option>
+      <option value="17">A*A*A</option>
+      <option value="16">A*AA</option>
+      <option value="15">AAA</option>
+      <option value="14">AAB / ABB</option>
+      <option value="13">ABB</option>
+      <option value="12">BBB</option>
+      <option value="11">BBC</option>
+      <option value="10">BCC</option>
+      <option value="9">CCC</option>
+      <option value="6">DDD</option>
+    </select>
+    <span class="grade-hint" id="gradeHint"></span>
+  </section>
+
+  <!-- ===================== 对比 / 收藏 ===================== -->
+  <nav class="tabs" id="tabs">
+    <button class="tab" data-view="compare" type="button"><span class="tab-dot"></span>对比</button>
+    <button class="tab" data-view="favorites" type="button"><span class="tab-dot"></span>收藏<span class="tab-count" id="favCount" hidden>0</span></button>
+  </nav>
+
+  <!-- ===================== 对比栏 ===================== -->
+  <section class="compare-tray" id="compareTray" hidden>
+    <div class="tray-items" id="trayItems"></div>
+    <div class="tray-actions">
+      <button class="btn btn-ghost btn-sm" id="trayClear" type="button">清空</button>
+      <button class="btn btn-primary btn-sm" id="trayRun" type="button">开始对比</button>
+    </div>
+  </section>
+
+  <!-- ===================== 浏览视图 ===================== -->
+  <section class="view" id="viewBrowse">
+    <div class="list-head">
+      <div class="result-count"><strong id="resultCount">0</strong> <span id="resultUnit">所符合要求的大学</span></div>
+      <div class="head-actions">
+        <label class="switch" title="隐藏「需查官网」的条目">
+          <input type="checkbox" id="hideCheck">
+          <span>隐藏需查官网</span>
+        </label>
+        <div class="sort-field">
+          <label for="sortSelect">排序</label>
+          <select id="sortSelect">
+            <option value="default">QS 排名</option>
+            <option value="level-asc">录取门槛：低 → 高</option>
+            <option value="level-desc">录取门槛：高 → 低</option>
+            <option value="country">按国家</option>
+            <option value="name">按校名</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="system-note" id="systemNote" hidden></div>
+    <div class="list" id="uniList"></div>
+  </section>
+
+  <!-- ===================== 对比视图 ===================== -->
+  <section class="view" id="viewCompare" hidden>
+    <div class="list-head">
+      <div class="result-count"><strong id="compareCount">0</strong> 所大学参与对比 · <span id="compareMajor">—</span></div>
+      <button class="text-btn" id="backToBrowse" type="button">← 返回浏览</button>
+    </div>
+
+    <!-- 手动添加要对比的大学 -->
+    <div class="add-school">
+      <button class="btn btn-ghost btn-sm" id="addToggle" type="button">＋ 手动添加大学</button>
+      <div class="add-panel" id="addPanel" hidden>
+        <div class="add-search">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.2-3.2"></path>
+          </svg>
+          <input type="search" id="addInput" placeholder="输入校名 / 英文名 / 城市，回车添加第一所" autocomplete="off">
+        </div>
+        <div class="add-results" id="addResults"></div>
+        <p class="hint" id="addHint">不受当前筛选条件限制，可直接加入任意大学；最多同时对比 4 所。</p>
+      </div>
+    </div>
+
+    <div class="table-wrap" id="compareTableWrap"></div>
+  </section>
+
+  <!-- ===================== 收藏视图 ===================== -->
+  <section class="view" id="viewFavorites" hidden>
+    <div class="list-head">
+      <div class="result-count"><strong id="favCount2">0</strong> 所已收藏的大学</div>
+      <div class="head-actions">
+        <button class="text-btn" id="favBack" type="button">← 返回浏览</button>
+        <button class="text-btn" id="clearFav" type="button">清空收藏</button>
+      </div>
+    </div>
+    <div class="list" id="favList"></div>
+  </section>
+
+</main>
+
+<footer class="app-footer">
+  <span id="footNote">数据由 xlsx 自动生成</span>
+  <span class="dot">·</span>
+  <span>录取要求每年调整，申请前请以学校官网当年招生页为准</span>
+</footer>
+
+<!-- ===================== 详情弹窗 ===================== -->
+<div class="modal" id="modal" hidden>
+  <div class="modal-backdrop" data-close="1"></div>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="detailName">
+    <header class="detail-head">
+      <div class="detail-head-main">
+        <div class="detail-badges" id="detailBadges"></div>
+        <h2 id="detailName">—</h2>
+        <p class="detail-en" id="detailEn"></p>
+      </div>
+      <div class="detail-head-actions">
+        <button class="btn btn-ghost btn-sm" id="detailFav" type="button">☆ 收藏</button>
+        <button class="btn btn-ghost btn-sm" id="detailCompare" type="button">＋ 对比</button>
+        <button class="icon-btn" id="detailClose" type="button" title="关闭">✕</button>
+      </div>
+    </header>
+    <div class="detail-body" id="detailBody"></div>
+    <footer class="detail-foot">
+      <span class="muted" id="detailHint">点任意专业可查看完整要求（含必选科目、笔试、面试等）</span>
+    </footer>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
