@@ -54,6 +54,25 @@
     <p class="intro-status" id="introStatus">正在装载数据…</p>
   </div>
 </div>
+<!-- 开场层兜底：不依赖 app.js，保证任何情况下都能进主界面 -->
+<script>
+(function () {
+  function force() {
+    var el = document.getElementById('intro');
+    if (!el) return;
+    document.body.classList.add('intro-done');
+    el.classList.add('hide');
+    setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 600);
+  }
+  // 5 秒后无论如何放行（点不动也不至于卡死）
+  setTimeout(force, 5000);
+  // 点哪都行：在 HTML 里直接绑，不依赖主脚本
+  var once = function () { setTimeout(force, 1600); };
+  ['click', 'pointerdown', 'touchstart', 'keydown'].forEach(function (t) {
+    document.addEventListener(t, once, { once: true, passive: true });
+  });
+})();
+</script>
 
 <!-- ===================== 顶部 ===================== -->
 <header class="app-header">

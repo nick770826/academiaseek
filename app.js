@@ -1465,7 +1465,10 @@ else init();
     });
   }
 
+  var started = false;
   function playIntro() {
+    if (started) return;                     // 幂等：重复触发（点击+自动兜底）不会跑两遍
+    started = true;
     if (btnWrap) btnWrap.classList.add('leaving');
     if (loading) loading.hidden = false;
 
@@ -1502,26 +1505,30 @@ else init();
     }
   }
 
-  // 允许跳过：点背景也可以
-  intro.addEventListener('click', function (e) {
-    if (e.target === intro || e.target === intro.querySelector('.intro-scan')) playIntro();
-  });
-  if (btn) btn.addEventListener('click', function (e) { e.stopPropagation(); playIntro(); });
+  // ── 进入方式（三重保险，任何环境都不会卡住）──
+  // ① 点按钮 ② 点屏幕任意位置 ③ 触摸 ④ 按回车/空格 ⑤ 6.5 秒后自动进入
+  //
+  // 之前只有"点按钮/点背景"的 click 监听，一旦 click 没送达（某些拦截插件、
+  // 或是用户点到伪元素扩展出来的透明区域），开场层就把整个页面永久盖住了。
+  // 现在任何一条路径都能进入，并且最后还有定时器兜底。
+  intro.addEventListener('click', function () { playIntro(); });
+  intro.addEventListener('pointerdown', function () { playIntro(); });
+  intro.addEventListener('touchstart', function () { playIntro(); }, { passive: true });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') playIntro();
+  }, { once: true });
 
-  // 键盘：回车/空格也能开始
-  document.addEventListener('keydown', function onKey(e) {
-    if (intro.parentNode && (e.key === 'Enter' || e.key === ' ')) {
-      e.preventDefault();
-      document.removeEventListener('keydown', onKey);
-      playIntro();
-    }
-  });
+  // 兜底：无论发生什么，6.5 秒后自动进入（用户不会被开场层困住）
+  setTimeout(playIntro, 2600);
 
-  // 安全兜底：脚本异常时不让开场层卡住用户
+  // 更外层保险：脚本若在上面这段之前就抛异常，这个独立定时器也会放行
   setTimeout(function () {
-    if (intro.parentNode && !document.body.classList.contains('intro-done') &&
-        !intro.classList.contains('scanning')) {
-      setProgress(100, '就绪');
+    var el = document.getElementById('intro');
+    if (el && el.parentNode) {
+      document.body.classList.add('intro-done');
+      el.style.transition = 'opacity .4s ease';
+      el.style.opacity = '0';
+      setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 500);
     }
-  }, 6000);
+  }, 4600);
 })();
