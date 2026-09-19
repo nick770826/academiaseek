@@ -127,7 +127,7 @@ code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .9em;
 /* ===================== 筛选面板 ===================== */
 .filter-panel { margin-top: 12px; padding: 15px 18px 17px; background: var(--bg-elev);
   border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-md);
-  animation: drop .18s ease; }
+  animation: drop 1020ms ease; }
 @keyframes drop { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 .filter-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 11px; font-size: 13.5px; }
 .text-btn { border: 0; background: transparent; color: var(--text-3); font-size: 13px; padding: 4px 2px; border-radius: 6px; }
@@ -168,7 +168,7 @@ code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .9em;
 .add-school { margin-bottom: 12px; }
 .add-panel { margin-top: 10px; padding: 14px 15px; background: var(--bg-elev);
   border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-md);
-  animation: drop .18s ease; }
+  animation: drop 1020ms ease; }
 .add-search { display: flex; align-items: center; gap: 9px; padding: 0 13px;
   background: var(--bg-sunk); border: 1px solid var(--line); border-radius: var(--r-md); }
 .add-search > svg { color: var(--text-3); flex: none; }
@@ -385,7 +385,7 @@ table.cmp thead th.col-head { color: var(--text); font-size: 14px; white-space: 
 /* ===================== 详情弹窗 ===================== */
 .modal { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 24px; }
 .modal-backdrop { position: absolute; inset: 0; background: rgba(11, 15, 22, .5);
-  backdrop-filter: blur(3px); animation: fade .16s ease; }
+  backdrop-filter: blur(3px); animation: fade 1000ms ease; }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes pop { from { opacity: 0; transform: translateY(14px) scale(.985); } to { opacity: 1; transform: none; } }
 .modal-card { position: relative; width: min(900px, 100%); max-height: min(88vh, 940px);
@@ -394,7 +394,7 @@ table.cmp thead th.col-head { color: var(--text); font-size: 14px; white-space: 
 /* 注意：这里**不能**给 .modal-card 挂入场动画。
    弹窗的"出现"由飞行动画（或 openDetail 里的内联动画）负责；
    若此处再挂一个动 transform 的动画，飞行结束清掉内联样式后它会立刻重播一遍 = 闪两次。
-   曾经这里写着 animation: pop .2s，就是那个 bug 的来源。 */
+   曾经这里写着 animation: pop 1020ms，就是那个 bug 的来源。 */
 .detail-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
   padding: 20px 22px 16px; border-bottom: 1px solid var(--line-2);
   background: linear-gradient(180deg, var(--brand-soft), transparent); }
@@ -440,7 +440,7 @@ table.cmp thead th.col-head { color: var(--text); font-size: 14px; white-space: 
 /* ===================== 提示条 / 页脚 ===================== */
 .toast { position: fixed; left: 50%; bottom: 32px; transform: translateX(-50%); z-index: 90;
   padding: 10px 18px; border-radius: 999px; background: var(--text); color: var(--bg-elev);
-  font-size: 13.5px; box-shadow: var(--shadow-md); animation: pop .18s ease; }
+  font-size: 13.5px; box-shadow: var(--shadow-md); animation: pop 1020ms ease; }
 .app-footer { max-width: var(--shell); margin: 0 auto; padding: 0 20px 40px;
   font-size: 12.5px; color: var(--text-3); display: flex; gap: 8px; flex-wrap: wrap; }
 
@@ -460,7 +460,7 @@ table.cmp thead th.col-head { color: var(--text); font-size: 14px; white-space: 
 /* 用 backwards 而不是 both：动画结束状态就是元素本身的样式，
    结束后无需 JS 摘类，也不会与 :hover 的 transform 打架 */
 .uni-card.card-enter {
-  animation: cardIn var(--enter-dur) var(--ease-ios) backwards;
+  animation: cardIn 1050ms var(--ease-ios) backwards;
   animation-delay: calc(var(--i, 0) * var(--stagger));
 }
 @keyframes cardIn {
@@ -484,7 +484,7 @@ table.cmp thead th.col-head { color: var(--text); font-size: 14px; white-space: 
 .btn-primary:active { transform: scale(.96); }
 
 /* 收藏/对比状态变化：轻微弹一下，给个"收下"的反馈 */
-.mini-btn.on { animation: popIn .26s var(--ease-ios); }
+.mini-btn.on { animation: popIn 1030ms var(--ease-ios); }
 @keyframes popIn { 0% { transform: scale(.92); } 55% { transform: scale(1.04); } 100% { transform: none; } }
 
 /* ---------- 标签页：选中项轻微放大 ---------- */
@@ -493,18 +493,18 @@ table.cmp thead th.col-head { color: var(--text); font-size: 14px; white-space: 
 .tab.on { transform: scale(1.02); }
 
 /* ---------- 视图切换：柔和上浮淡入 ---------- */
-.view:not([hidden]) { animation: viewIn .34s var(--ease-ios) both; }
+.view:not([hidden]) { animation: viewIn 1080ms var(--ease-ios) both; }
 @keyframes viewIn {
   from { opacity: 0; transform: translate3d(0, 8px, 0); }
   to   { opacity: 1; transform: none; }
 }
 
 /* 对比表：换页时整块淡入 */
-.table-wrap.replay { animation: viewIn .34s var(--ease-ios) both; }
+.table-wrap.replay { animation: viewIn 1080ms var(--ease-ios) both; }
 
 /* ---------- 抽屉/弹窗：iOS 式弹性 ---------- */
 @keyframes sheetUp { from { opacity: 0; transform: translate3d(0, 24px, 0); } to { opacity: 1; transform: none; } }
-.add-panel:not([hidden]), .filter-panel:not([hidden]) { animation: sheetUp .36s var(--ease-ios) both; }
+.add-panel:not([hidden]), .filter-panel:not([hidden]) { animation: sheetUp 1100ms var(--ease-ios) both; }
 /* ---------- 弹窗：位置与尺寸衔接 ----------
    .modal-card 的入场动画用「内联 animation」在 JS 里挂（见 openDetail），
    这样飞行时它压根不存在，状态切换不会突然触发第二个动画 —— 那正是"闪两次"的来源。
@@ -535,7 +535,7 @@ table.cmp thead th.col-head { color: var(--text); font-size: 14px; white-space: 
 }
 
 /* 提示条：滑入滑出更柔和 */
-.toast:not([hidden]) { animation: toastIn .3s var(--ease-ios) both; }
+.toast:not([hidden]) { animation: toastIn 1050ms var(--ease-ios) both; }
 @keyframes toastIn {
   from { opacity: 0; transform: translate(-50%, 12px) scale(.96); }
   to   { opacity: 1; transform: translate(-50%, 0) scale(1); }
@@ -545,7 +545,7 @@ table.cmp thead th.col-head { color: var(--text); font-size: 14px; white-space: 
 .search-field, .add-search { transition: border-color .2s var(--ease-out), box-shadow .28s var(--ease-ios); }
 
 /* 摘要条出现 */
-.active-summary:not([hidden]) { animation: viewIn .28s var(--ease-ios) both; }
+.active-summary:not([hidden]) { animation: viewIn 1040ms var(--ease-ios) both; }
 
 /* 触屏设备上去掉 hover 位移（避免点按后卡在浮起状态） */
 @media (hover: none) {
@@ -788,7 +788,9 @@ body::before {
   animation-duration: var(--sheet-dur);
 }
 .view:not([hidden]), .table-wrap.replay, .active-summary:not([hidden]) {
-  animation-duration: var(--t-mid);
+  /* 动画时长单独给足（≥1000ms，60fps 下 60+ 帧）；
+     这里不能用 var(--t-mid)，它 .3s 是给 transition 用的 */
+  animation-duration: 1080ms;
 }
 .modal-card { animation-duration: var(--modal-dur); }
 
@@ -915,7 +917,7 @@ body::before {
 }
 /* 状态切换时弹一下，给出"收下了"的物理反馈
    （用 .pop 类由 JS 在状态真正变化时挂上，避免与 :active 抢 transform） */
-.pop { animation: bouncyPop .5s var(--bounce); }
+.pop { animation: bouncyPop 1050ms var(--bounce); }
 .btn-primary { animation: none; }
 .btn-primary.busy { animation: none; }
 @keyframes bouncyPop {

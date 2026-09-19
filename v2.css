@@ -1,0 +1,159 @@
+/* ============================================================
+ *  v2.css — 新数据结构的补充层
+ *  （学科门类折叠面板 / 学院条目 / 专业清单 / 对比表 / 详情工具条）
+ *  这一层只做加法：styles.css 的既有外观完全保留。
+ * ============================================================ */
+
+/* ---------- 筛选面板里的成绩选择 ---------- */
+.v2-graderow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.v2-select {
+  padding: 8px 30px 8px 12px; font: inherit; font-size: 13.5px;
+  color: var(--text); background: var(--bg-sunk);
+  border: 1px solid var(--line); border-radius: 14px; outline: none;
+  -webkit-appearance: none; appearance: none; cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, var(--text-3) 50%), linear-gradient(135deg, var(--text-3) 50%, transparent 50%);
+  background-position: calc(100% - 15px) 50%, calc(100% - 10px) 50%;
+  background-size: 5px 5px, 5px 5px; background-repeat: no-repeat;
+  transition: border-color .18s var(--ease-out), box-shadow .18s var(--ease-out);
+}
+.v2-select:focus { border-color: var(--brand-ring); box-shadow: 0 0 0 3px var(--brand-soft); }
+.v2-graderow .grade-hint { font-size: 12.5px; color: var(--text-3); }
+
+/* ---------- 卡片上的门类标签 ---------- */
+.v2-cats { margin-top: 7px; gap: 5px; }
+.v2-cats .tag { font-size: 10.5px; padding: 1px 7px; border-radius: 8px; }
+.v2-cats .tag-brand { font-weight: 600; }
+/* 卡片更紧凑一点：QS 方块窄一些、卡片内边距小一点 */
+.uni-card { grid-template-columns: 66px 1fr auto; gap: 14px; padding: 12px 14px; }
+.uni-rank { min-height: 44px; padding: 6px 3px; }
+.uni-req { margin-top: 5px; }
+
+/* ---------- 筛选 chip 上的计数 ---------- */
+.chip-n {
+  display: inline-block; margin-left: 6px; padding: 0 5px;
+  font-size: 11px; line-height: 16px; border-radius: 999px;
+  background: var(--bg-sunk); color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.chip.on .chip-n { background: rgba(255, 255, 255, .22); color: #fff; }
+
+/* ---------- 详情：工具条 ---------- */
+.v2-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.v2-input {
+  flex: 1; min-width: 0; padding: 9px 13px; font: inherit; font-size: 13.5px;
+  color: var(--text); background: var(--bg-sunk);
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  outline: none; transition: border-color .18s var(--ease-out), box-shadow .18s var(--ease-out);
+}
+.v2-input:focus { border-color: var(--brand-ring); box-shadow: 0 0 0 3px var(--brand-soft); }
+.v2-hint { flex: none; font-size: 12px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+
+/* ---------- 学科门类折叠面板 ---------- */
+.v2-catlist { display: grid; gap: 10px; }
+.v2-cat {
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--bg-elev); overflow: hidden;
+}
+.v2-cat-head {
+  display: flex; align-items: center; gap: 9px; width: 100%;
+  padding: 11px 13px; font: inherit; text-align: left; cursor: pointer;
+  background: transparent; border: 0; color: var(--text);
+  transition: background-color .18s var(--ease-out);
+}
+.v2-cat-head:hover { background: var(--bg-sunk); }
+.v2-caret {
+  flex: none; width: 12px; font-size: 11px; color: var(--text-3);
+  transition: transform .22s var(--ease-ios);
+}
+.v2-cat.open .v2-caret { transform: rotate(90deg); }
+.v2-cat-name { font-size: 14.5px; font-weight: 620; letter-spacing: .1px; }
+.v2-cat-meta { margin-left: auto; font-size: 12px; color: var(--text-3); white-space: nowrap; }
+.v2-cat-body { display: none; padding: 2px 13px 13px 34px; }
+.v2-cat.open .v2-cat-body { display: block; animation: v2Slide 1020ms var(--ease-ios); }
+@keyframes v2Slide { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+/* ---------- 学院条目 ---------- */
+.v2-entry { padding: 12px 0; border-top: 1px dashed var(--line); }
+.v2-entry:first-child { border-top: 0; }
+.v2-entry-head { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-bottom: 6px; }
+.v2-college { font-size: 13px; font-weight: 580; color: var(--text-2); }
+.v2-entry-head .lv-chip { margin-left: auto; }
+.v2-req { margin: 0 0 6px; }
+.v2-subj {
+  margin: 0 0 8px; font-size: 13px; line-height: 1.7; color: var(--text-2);
+  padding: 8px 11px; background: var(--bg-sunk); border-radius: var(--r-sm, 8px);
+}
+.v2-src { margin-top: 7px; font-size: 11.5px; color: var(--text-3); }
+.v2-src a { color: var(--brand); text-decoration: none; }
+.v2-src a:hover { text-decoration: underline; }
+.v2-note-line {
+  margin-top: 5px; padding-left: 9px; border-left: 2px solid var(--line);
+  font-size: 11.5px; line-height: 1.65; color: var(--text-3);
+}
+
+/* ---------- 专业清单折叠 ---------- */
+.v2-progs { margin: 8px 0 2px; }
+.v2-progs > summary {
+  cursor: pointer; font-size: 12.5px; color: var(--brand);
+  padding: 3px 0; list-style: none; user-select: none;
+}
+.v2-progs > summary::-webkit-details-marker { display: none; }
+.v2-progs > summary::before {
+  content: '▸'; display: inline-block; margin-right: 5px; font-size: 10px;
+  transition: transform .2s var(--ease-ios);
+}
+.v2-progs[open] > summary::before { transform: rotate(90deg); }
+.v2-progchips { margin-top: 8px; gap: 5px; }
+.v2-progchips .chip { padding: 3px 9px; font-size: 12px; cursor: default; }
+.v2-progchips .chip:hover { border-color: var(--line); color: var(--text-2); }
+
+/* ---------- 详情里的说明块 ---------- */
+.v2-note { margin: 12px 0 0; background: var(--brand-soft); color: var(--brand); border-color: transparent; }
+.v2-note b { font-weight: 650; }
+.v2-syshint { margin: 8px 0 0; }
+
+/* ---------- 对比 ---------- */
+.cmp-picker {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 12px; padding: 11px 13px;
+  background: var(--glass-bg); border: 1px solid var(--glass-border);
+  border-radius: var(--r-md);
+}
+.v2-picker-label { font-size: 12.5px; color: var(--text-3); flex: none; }
+.cmp-picker .chip { padding: 4px 11px; font-size: 12.5px; }
+
+.cmp-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.cmp-table th, .cmp-table td {
+  padding: 10px 13px; text-align: left; vertical-align: top;
+  border-bottom: 1px solid var(--line);
+}
+.cmp-table thead th {
+  position: sticky; top: 0; z-index: 1;
+  background: var(--bg-elev); backdrop-filter: blur(10px);
+}
+.cmp-table .cmp-k {
+  width: 116px; font-weight: 520; color: var(--text-3); font-size: 12.5px;
+  white-space: nowrap;
+}
+.cmp-name { font-size: 14px; font-weight: 620; }
+.cmp-sub { font-size: 11.5px; color: var(--text-3); font-weight: 400; margin-top: 2px; }
+.cmp-table tbody tr:hover td { background: var(--bg-sunk); }
+.cmp-sep td, .cmp-sep th {
+  background: var(--brand-soft); color: var(--brand); font-weight: 620;
+  font-size: 12.5px; letter-spacing: .3px;
+}
+.cmp-table .muted { color: var(--text-3); }
+
+/* ---------- 详情弹窗滚动 ---------- */
+.detail-body { max-height: min(64vh, 720px); overflow-y: auto; overscroll-behavior: contain; }
+.detail-body::-webkit-scrollbar { width: 9px; }
+.detail-body::-webkit-scrollbar-thumb { background: var(--line); border-radius: 999px; }
+.detail-body::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
+.detail-head h2 { font-size: 21px; }
+
+/* ---------- 小屏 ---------- */
+@media (max-width: 720px) {
+  .v2-cat-body { padding-left: 13px; }
+  .filter-group { grid-template-columns: 1fr; gap: 6px; }
+  .detail-body { max-height: 72vh; }
+}

@@ -3,36 +3,57 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Academiaseek · A-Level 录取要求查询</title>
+<title>Academiaseek · QS 前 300 大学全专业 · A-Level 入学要求</title>
 <!--
   ============================================================
-  英澳法德马新 · QS 前 300 大学 A-Level 录取要求查询
+  QS 前 300 大学 · 本科全专业清单与 A-Level 入学要求查询
   ============================================================
   文件分工：
     index.html   界面结构
-    styles.css   外观
+    styles.css   外观（旧层，保留）
+    v2.css       新数据结构的补充层（学科门类 / 学院条目 / 专业清单）
     data.js      数据（由 xlsx 自动生成，勿手改）
     app.js       逻辑
   ============================================================
 -->
 <link rel="stylesheet" href="styles.css">
-<!-- 卡片毛玻璃材质（独立一层，想回退就删掉这一行） -->
 <link rel="stylesheet" href="card-material.css">
-<!-- 交互反馈：悬停轻微放大、去掉蓝色焦点框（独立一层，可删） -->
 <link rel="stylesheet" href="interaction.css">
-<!-- 暗色模式 + 性能优化（独立一层，可删） -->
 <link rel="stylesheet" href="performance.css">
+<link rel="stylesheet" href="v2.css">
+<link rel="stylesheet" href="v3.css">
 </head>
 <body>
 
 <noscript>
   <div class="load-warn"><strong>JavaScript 被禁用了。</strong>
-    本页的搜索、筛选、专业切换都依赖脚本，请在浏览器设置里允许 JavaScript。</div>
+    本页的搜索、筛选、专业清单展开都依赖脚本，请在浏览器设置里允许 JavaScript。</div>
 </noscript>
 <div id="noScript" class="load-warn" hidden><strong>页面脚本没有运行起来。</strong>
   如果你是在「预览面板 / 内置窗口」里看的，那里通常会禁掉 JavaScript —— 请用浏览器直接打开
   <code>index.html</code>（双击即可）。若已是浏览器打开，请按 F12 查看 Console 报错。</div>
 <script>document.getElementById('noScript').hidden = false;</script>
+
+<!-- ===================== 开场动画 =====================
+     黑底 → 中央大按钮（博士帽 + Begin the search）→ 点击后进度条 → 扫屏 → 露出主界面 -->
+<div class="intro" id="intro" role="dialog" aria-label="开场">
+  <div class="intro-scan" aria-hidden="true"></div>
+  <div class="intro-btn-wrap" id="introBtnWrap">
+    <button class="intro-btn" id="introBtn" type="button" aria-label="开始探索">
+      <svg class="intro-logo" viewBox="0 0 48 48" aria-hidden="true">
+        <path d="M24 8 L44 18 L24 28 L4 18 Z" />
+        <path d="M12 22 L12 31 C12 35 18 39 24 39 C30 39 36 35 36 31 L36 22" />
+        <path d="M44 18 L44 30" />
+        <circle cx="44" cy="32" r="2.6" />
+      </svg>
+      <span class="intro-label">Begin the search</span>
+    </button>
+  </div>
+  <div class="intro-loading" id="introLoading" hidden>
+    <div class="intro-bar"><i id="introBarFill"></i></div>
+    <p class="intro-status" id="introStatus">正在装载数据…</p>
+  </div>
+</div>
 
 <!-- ===================== 顶部 ===================== -->
 <header class="app-header">
@@ -45,8 +66,8 @@
         </svg>
       </div>
       <div class="brand-text">
-        <h1>Academiaseek</h1>
-        <p>A-Level · 英澳法德马新 · QS 前 300</p>
+        <h1>Academiaseek<span class="ver-badge" title="当前版本">1.1.2</span></h1>
+        <p>QS 前 300 · 全专业清单 · A-Level 入学要求</p>
       </div>
     </div>
     <div class="header-actions">
@@ -66,7 +87,7 @@
       <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
         <circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.2-3.2"></path>
       </svg>
-      <input type="search" id="searchInput" placeholder="搜索大学名称 / 英文名 / 城市 / 国家…" autocomplete="off">
+      <input type="search" id="searchInput" placeholder="搜索大学 / 英文名 / 城市 / 国家 / 专业名…" autocomplete="off">
       <button class="search-clear" id="searchClear" type="button" title="清空" hidden>✕</button>
     </div>
     <button class="filter-btn" id="filterToggle" type="button">
@@ -77,31 +98,20 @@
     </button>
   </div>
 
-  <!-- ===================== 当前条件摘要（无筛选时只显示专业） ===================== -->
+  <!-- ===================== 推定门槛说明（搜索栏下方） ===================== -->
+  <p class="assume-note" id="assumeNote">
+    <span class="an-badge">推定门槛</span>
+    标 <span class="an-tilde">≈</span> 的门槛<strong>不是官网原话</strong>：该专业官网没有公布 A-Level 等级线，
+    我们按「本校已公布门槛的中位数」＋「该学科门类相对本校的难度」估算得出，
+    <strong>仅供参考</strong>；申请前请以学校官网当年要求为准。
+    美国 / 加拿大等不按 A-Level 等级录取的地区，此处数值参考价值有限。
+  </p>
+
+  <!-- ===================== 当前条件摘要 ===================== -->
   <div class="active-summary" id="activeSummary" hidden></div>
 
-  <!-- ===================== 筛选面板（含专业选择） ===================== -->
+  <!-- ===================== 筛选面板（含我的成绩） ===================== -->
   <section class="filter-panel" id="filterPanel" hidden></section>
-
-  <!-- ===================== 我的成绩（可选） ===================== -->
-  <section class="grade-block" id="gradeBlock" hidden>
-    <label for="gradeSelect">我的 A-Level 预估成绩</label>
-    <select id="gradeSelect">
-      <option value="">不限制</option>
-      <option value="18">A*A*A*</option>
-      <option value="17">A*A*A</option>
-      <option value="16">A*AA</option>
-      <option value="15">AAA</option>
-      <option value="14">AAB / ABB</option>
-      <option value="13">ABB</option>
-      <option value="12">BBB</option>
-      <option value="11">BBC</option>
-      <option value="10">BCC</option>
-      <option value="9">CCC</option>
-      <option value="6">DDD</option>
-    </select>
-    <span class="grade-hint" id="gradeHint"></span>
-  </section>
 
   <!-- ===================== 对比 / 收藏 ===================== -->
   <nav class="tabs" id="tabs">
@@ -121,11 +131,25 @@
   <!-- ===================== 浏览视图 ===================== -->
   <section class="view" id="viewBrowse">
     <div class="list-head">
-      <div class="result-count"><strong id="resultCount">0</strong> <span id="resultUnit">所符合要求的大学</span></div>
+      <div class="result-count"><strong id="resultCount">0</strong> <span id="resultUnit">所大学</span></div>
       <div class="head-actions">
-        <label class="switch" title="隐藏「需查官网」的条目">
+        <div class="col-toggle" id="colToggle" role="group" aria-label="卡片列数">
+          <button type="button" class="col-btn on" data-cols="1" title="单列显示" aria-pressed="true">
+            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+              <rect x="1.5" y="2" width="13" height="4" rx="1.4"></rect>
+              <rect x="1.5" y="10" width="13" height="4" rx="1.4"></rect>
+            </svg>
+          </button>
+          <button type="button" class="col-btn" data-cols="2" title="双列显示" aria-pressed="false">
+            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+              <rect x="1.5" y="2" width="5.6" height="12" rx="1.4"></rect>
+              <rect x="8.9" y="2" width="5.6" height="12" rx="1.4"></rect>
+            </svg>
+          </button>
+        </div>
+        <label class="switch" title="隐藏门槛为「同侪推定」的条目">
           <input type="checkbox" id="hideCheck">
-          <span>隐藏需查官网</span>
+          <span>隐藏推定门槛</span>
         </label>
         <div class="sort-field">
           <label for="sortSelect">排序</label>
@@ -133,6 +157,7 @@
             <option value="default">QS 排名</option>
             <option value="level-asc">录取门槛：低 → 高</option>
             <option value="level-desc">录取门槛：高 → 低</option>
+            <option value="programs">专业数量：多 → 少</option>
             <option value="country">按国家</option>
             <option value="name">按校名</option>
           </select>
@@ -150,7 +175,6 @@
       <button class="text-btn" id="backToBrowse" type="button">← 返回浏览</button>
     </div>
 
-    <!-- 手动添加要对比的大学 -->
     <div class="add-school">
       <button class="btn btn-ghost btn-sm" id="addToggle" type="button">＋ 手动添加大学</button>
       <div class="add-panel" id="addPanel" hidden>
@@ -165,6 +189,7 @@
       </div>
     </div>
 
+    <div class="cmp-picker" id="cmpPicker" hidden></div>
     <div class="table-wrap" id="compareTableWrap"></div>
   </section>
 
@@ -185,7 +210,7 @@
 <footer class="app-footer">
   <span id="footNote">数据由 xlsx 自动生成</span>
   <span class="dot">·</span>
-  <span>录取要求每年调整，申请前请以学校官网当年招生页为准</span>
+  <span>门槛分中「官网」为原文解析，「推定」为按同侪院校推算；申请前请以学校官网当年招生页为准</span>
 </footer>
 
 <!-- ===================== 详情弹窗 ===================== -->
@@ -206,12 +231,13 @@
     </header>
     <div class="detail-body" id="detailBody"></div>
     <footer class="detail-foot">
-      <span class="muted" id="detailHint">点任意专业可查看完整要求（含必选科目、笔试、面试等）</span>
+      <span class="muted" id="detailHint">点学科门类可展开该门类下各学院的要求与完整专业清单</span>
     </footer>
   </div>
 </div>
 
 <div class="toast" id="toast" hidden></div>
+<button class="to-top" id="toTop" type="button" title="回到顶部" aria-label="回到顶部" hidden>↑</button>
 
 <script src="data.js"></script>
 <script src="app.js"></script>
